@@ -3,7 +3,7 @@ import os
 import bpy
 
 # loops over all subfolder
-CONVERT_DIR = "absolut/path/to/meshes/directory"
+CONVERT_DIR = "/home/mneumann/work/development/PR2UnrealSimulator/src/robotiq/robotiq_2f_model/model/meshes/2f85"
 
 
 def file_iter(path, ext):
@@ -38,15 +38,35 @@ def convert_recursive(base_path):
         filepath_dst = os.path.splitext(filepath_src)[0] + ".fbx"
 
         print("Converting %r -> %r" % (filepath_src, filepath_dst))
-        for obj in bpy.context.scene.objects:
-            if obj.type == 'MESH':
-                obj.select = True
-            else:
-                obj.select = False
-            bpy.ops.object.delete()
 
-        bpy.ops.wm.collada_import(filepath=filepath_src)
-        bpy.ops.export_scene.fbx(filepath=filepath_dst)
+        for obj in bpy.context.scene.objects:
+            print(" delete obj ")
+            try:
+                if obj.type == 'MESH':
+                    print("if true")
+                    obj.select = True
+                else:
+                    print("if false")
+                    obj.select = False
+                bpy.ops.object.delete()
+                print("after delete")
+            except:
+                print("Error during deleting object")
+                break
+
+        print("Import ", filepath_src)
+        try:
+            bpy.ops.wm.collada_import(filepath=filepath_src, import_units=True)
+        except:
+            print("Could not import ", filepath_src)
+            continue
+
+        print("Export ", filepath_dst)
+        try:
+            bpy.ops.export_scene.fbx(filepath=filepath_dst)
+        except:
+            print("Could not export ", filepath_dst)
+            continue
 
 if __name__ == "__main__":
     convert_recursive(CONVERT_DIR)
