@@ -3,7 +3,7 @@ import os
 import bpy
 
 # loops over all subfolder
-CONVERT_DIR = "/home/mneumann/work/development/PR2UnrealSimulator/src/robotiq/robotiq_2f_model/model/meshes/2f85"
+CONVERT_DIR = "absolut/path/to/meshes/directory"
 
 
 def file_iter(path, ext):
