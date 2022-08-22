@@ -68,7 +68,7 @@ def convert_recursive(base_path):
             print("Could not export ", filepath_dst)
             continue
            
-   for filepath_src in file_iter(base_path, ".obj"):
+    for filepath_src in file_iter(base_path, ".obj"):
         filepath_dst = os.path.splitext(filepath_src)[0] + ".fbx"
 
         print("Converting %r -> %r" % (filepath_src, filepath_dst))
@@ -76,20 +76,14 @@ def convert_recursive(base_path):
     #     reset_blend()
         for obj in bpy.context.scene.objects:
             bpy.ops.object.select_all(action='DESELECT')
-            print(" delete obj ")
-            try:
-                if obj.type == 'MESH':
-                   print("if true")
-                   # obj.select = True
-                   obj.select_set(True)
-                else:
-                    print("if false")
-                    obj.select = False
-                bpy.ops.object.delete()
-                print("after delete")
-            except:
-                print("Error during deleting object")
-                break
+            if obj.type == 'MESH':
+                #obj.select = True
+                obj.select_set(True)
+            else:
+                obj.select_set(False)
+            bpy.ops.object.delete()
+        bpy.ops.import_scene.obj(filepath=filepath_src)
+        bpy.ops.export_scene.fbx(filepath=filepath_dst, global_scale=0.1)
 
 if __name__ == "__main__":
     convert_recursive(CONVERT_DIR)
