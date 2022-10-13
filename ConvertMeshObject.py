@@ -3,12 +3,13 @@ import os
 import bpy
 
 # loops over all subfolder
-CONVERT_DIR = "/home/mneumann/work/development/PR2UnrealSimulator/src/robotiq/robotiq_2f_model/model/meshes/2f85"
+CONVERT_DIR = "/path/to/meshes/"
 
 
 def file_iter(path, ext):
     for dirpath, dirnames, filenames in os.walk(path):
         for filename in filenames:
+            print(filename)
             extension = os.path.splitext(filename)[1]
             if extension.lower().endswith(ext):
                 yield os.path.join(dirpath, filename)
@@ -25,14 +26,28 @@ def convert_recursive(base_path):
         print("Converting %r -> %r" % (filepath_src, filepath_dst))
 
     #     reset_blend()
+        #select all objects in scene
         for obj in bpy.context.scene.objects:
-            if obj.type == 'MESH':
-                obj.select = True
-            else:
-                obj.select = False
+                obj.select_set(True)
+        #delete all selected objects
+        try:
             bpy.ops.object.delete()
-        bpy.ops.import_mesh.stl(filepath=filepath_src)
-        bpy.ops.export_scene.fbx(filepath=filepath_dst)
+        except Exception as e:
+            print("Error during object deletion: ",e)
+
+        try:
+            print(obj.type)
+            for obj in bpy.context.scene.objects:
+                if obj.type != 'MESH':
+                    obj.select_set(True)
+                else:
+                    obj.select_set(False)
+            bpy.ops.object.delete()
+            bpy.ops.import_mesh.stl(filepath=filepath_src)
+            bpy.ops.export_scene.fbx(filepath=filepath_dst)
+        except Exception as e:
+            print("Error during stl conversion: ",e)
+
 
     for filepath_src in file_iter(base_path, ".dae"):
         filepath_dst = os.path.splitext(filepath_src)[0] + ".fbx"
@@ -40,33 +55,30 @@ def convert_recursive(base_path):
         print("Converting %r -> %r" % (filepath_src, filepath_dst))
 
         for obj in bpy.context.scene.objects:
-            print(" delete obj ")
             try:
-                if obj.type == 'MESH':
-                    print("if true")
-                    obj.select = True
-                else:
-                    print("if false")
-                    obj.select = False
-                bpy.ops.object.delete()
-                print("after delete")
-            except:
-                print("Error during deleting object")
+                print(obj)
+                obj.select_set(True)
+                #else:
+               #     obj.select_set(False)
+            except Exception as e:
+                print("Error during deleting object ", e)
                 break
-
-        print("Import ", filepath_src)
         try:
+            bpy.ops.object.delete()
+            print("Import ", filepath_src)
             bpy.ops.wm.collada_import(filepath=filepath_src, import_units=True)
-        except:
-            print("Could not import ", filepath_src)
+        except Exception as e:
+            print("Could not import ", filepath_src, "Error: ", e)
             continue
 
-        print("Export ", filepath_dst)
+
         try:
+            print("Export ", filepath_dst)
             bpy.ops.export_scene.fbx(filepath=filepath_dst)
-        except:
-            print("Could not export ", filepath_dst)
+        except Exception as e:
+            print("Could not export ", filepath_dst, "Error: ", e)
             continue
 
 if __name__ == "__main__":
+    print("start")
     convert_recursive(CONVERT_DIR)
